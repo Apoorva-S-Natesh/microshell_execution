@@ -6,9 +6,8 @@
 
 int	main(void)
 {
-	int	fd[2];
-	int	pid2;
-	int	pid1;
+	int	fd[2]; // File descriptors for the pipe
+	int	pid1, pid2; // Process IDs for the two child processes
 	int wstatus;
 
 	if (pipe(fd) == -1)
@@ -20,12 +19,12 @@ int	main(void)
 	{
 		//Reroute the std output of the process that starts ping
 		dup2(fd[1], STDOUT_FILENO); // duplicates first fd(fd[1]) into second fd(STDOUT), so STDOUT is going to point to fd[1]
-		close(fd[0]);
-		close(fd[1]);
+		close(fd[0]); // Close unused pipe ends
+		close(fd[1]); // Close unused pipe ends
 		execlp("ping", "ping", "-c", "2", "google.com", NULL); // dosnt need the 
 		//input to be an array and get access to bash env variables
 		//if it cant find the executable to execute, returns an error code.
-		perror("execlp");
+		perror("execlp"); // If execlp returns, it means an error occurred
 		exit (2);
 	}
 	pid2 = fork();
@@ -41,9 +40,12 @@ int	main(void)
 		perror("grep");
 		exit (2);
 	}
+	// Parent process
+    // Close both ends of the pipe in the parent
+    // The pipe is now only accessible to the children
 	close(fd[0]);
 	close(fd[1]);
-	waitpid(pid1, &wstatus, 0);
+	waitpid(pid1, &wstatus, 0); // Wait for the ping process to finish and check its status
 	if (WIFEXITED(wstatus))
 	{
 		int statuscode = WEXITSTATUS(wstatus);
@@ -52,7 +54,7 @@ int	main(void)
 		else
 			printf("Failure in ping with status code %d \n", statuscode);
 	}
-	waitpid(pid2, NULL, 0);
+	waitpid(pid2, NULL, 0); // Wait for the grep process to finish and check its status
 		if (WIFEXITED(wstatus))
 	{
 		int statuscode = WEXITSTATUS(wstatus);
