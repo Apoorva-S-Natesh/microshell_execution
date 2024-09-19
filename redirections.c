@@ -32,6 +32,8 @@ void execute_command(char **args, char *input_file, char *output_file, int appen
         }
 
         // Handle output redirection
+		// This block handles output redirection. It opens the output file (creating it if necessary), sets the appropriate flags for appending or truncating, duplicates it to stdout, 
+		//and closes the original file descriptor.
         if (output_file != NULL) {
             int flags = O_WRONLY | O_CREAT;
             if (append_output) {
@@ -79,6 +81,8 @@ int main() {
         input[strcspn(input, "\n")] = 0;
 
         // Tokenize input
+		//This block parses the input, identifying redirection 
+		//operators and their associated files.
         int arg_count = 0;
         char *token = strtok(input, " ");
         while (token != NULL && arg_count < MAX_ARGS - 1) {
@@ -105,7 +109,7 @@ int main() {
             token = strtok(NULL, " ");
         }
         args[arg_count] = NULL;
-
+	//If there are arguments, it checks for the "exit" command or executes the command.
         if (arg_count > 0) {
             if (strcmp(args[0], "exit") == 0) {
                 break;
@@ -114,6 +118,8 @@ int main() {
         }
 
         // Reset redirection variables
+		//This resets the redirection variables for the next command and continues the loop.
+
         input_file = NULL;
         output_file = NULL;
         append_output = 0;
